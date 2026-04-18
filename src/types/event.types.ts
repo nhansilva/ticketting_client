@@ -74,7 +74,13 @@ export interface Seat {
   status: SeatStatus;
 }
 
-/** Helper — type guards */
+/**
+ * Type guard — narrows `detail` to ConcertDetail.
+ * Dual check: `type === 'CONCERT'` catches semantic mismatch,
+ * `'artists' in detail` provides structural runtime evidence and prevents
+ * accidentally rendering concert UI if the backend ever returns a malformed payload
+ * (e.g., mismatched type + detail combination).
+ */
 export function isConcertDetail(detail: ConcertDetail | MovieDetail, type: EventType): detail is ConcertDetail {
   return type === 'CONCERT' && 'artists' in detail;
 }

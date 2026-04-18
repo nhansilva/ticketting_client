@@ -2,7 +2,7 @@ import { eventAxiosInstance } from './eventAxios';
 import type { ApiResponse } from '../types/auth.types';
 import type { EventSummary, Event, Venue, Seat, EventType, EventStatus } from '../types/event.types';
 
-interface ListEventsParams {
+export interface ListEventsParams {
   type?: EventType;
   status?: EventStatus;
   page?: number;
