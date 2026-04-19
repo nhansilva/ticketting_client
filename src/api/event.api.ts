@@ -26,7 +26,11 @@ export const eventApi = {
   },
 
   getSeats: async (eventId: string): Promise<Seat[]> => {
-    const res = await eventAxiosInstance.get<ApiResponse<Seat[]>>(`/api/v1/events/${eventId}/seats`);
-    return res.data.data;
+    // Backend returns seats grouped by row: { "A": [seat, ...], "B": [...] }
+    // Flatten to a single array for easier client-side handling
+    const res = await eventAxiosInstance.get<ApiResponse<Record<string, Seat[]>>>(`/api/v1/events/${eventId}/seats`);
+    const grouped = res.data.data;
+    if (Array.isArray(grouped)) return grouped;
+    return Object.values(grouped).flat();
   },
 };
