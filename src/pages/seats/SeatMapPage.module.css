@@ -1,0 +1,274 @@
+.page {
+  min-height: 100vh;
+  background: #faf9ff;
+  color: #1c1427;
+  padding-bottom: 6rem;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid #ede9fe;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backBtn {
+  background: #f5f3ff;
+  border: 1.5px solid #ddd6fe;
+  color: #6D28D9;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.headerTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1c1427;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.maxHint {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: #a8a29e;
+  white-space: nowrap;
+}
+
+/* ─── CONCERT: Arc Stadium ─── */
+.stadiumWrap {
+  max-width: 600px;
+  margin: 2rem auto 0;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stage {
+  background: #e9d5ff;
+  border: 2px solid #c4b5fd;
+  border-radius: 0.5rem;
+  padding: 0.4rem 2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6D28D9;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.zone {
+  width: 100%;
+  border-radius: 0 0 999px 999px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 2rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  user-select: none;
+}
+.zone:hover { opacity: 0.88; transform: scaleX(0.98); }
+
+.zoneVip      { background: #7c3aed; color: #fff; max-width: 65%; }
+.zoneGold     { background: #d97706; color: #fff; max-width: 78%; }
+.zoneGa       { background: #0f766e; color: #fff; max-width: 90%; }
+.zoneStanding { background: #4b5563; color: #fff; max-width: 100%; }
+.zoneActive   { outline: 3px solid #1c1427; outline-offset: 2px; }
+
+.zoneName  { font-weight: 700; font-size: 0.9rem; }
+.zonePrice { font-size: 0.8rem; opacity: 0.9; }
+.zoneCount { font-size: 0.75rem; opacity: 0.75; }
+
+/* ─── Seat Grid Panel ─── */
+.seatSection {
+  max-width: 900px;
+  margin: 1.5rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.screenLabel {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #a8a29e;
+  border-top: 3px solid #e7e5e4;
+  padding-top: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.seatRows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.seatRow {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.rowLabel {
+  width: 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #a8a29e;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.seat {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px 4px 2px 2px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: 600;
+  transition: transform 0.1s, box-shadow 0.1s;
+  flex-shrink: 0;
+}
+
+.seatAvailable {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1.5px solid #6ee7b7;
+}
+.seatAvailable:hover { transform: scale(1.15); box-shadow: 0 2px 6px rgba(16,185,129,0.4); }
+
+.seatSelected {
+  background: #7c3aed;
+  color: #fff;
+  border: 1.5px solid #6d28d9;
+  box-shadow: 0 0 8px rgba(124,58,237,0.5);
+  transform: scale(1.1);
+}
+
+.seatLocked {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1.5px solid #fca5a5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.seatSold {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border: 1.5px solid #e5e7eb;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.seatDisabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #78716c;
+}
+
+.legendDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+/* ─── Summary Bar ─── */
+.summaryBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(12px);
+  border-top: 1.5px solid #ede9fe;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.summarySeats {
+  flex: 1;
+  font-size: 0.85rem;
+  color: #44403c;
+}
+
+.summarySeatsCode {
+  font-weight: 700;
+  color: #7C3AED;
+}
+
+.summaryTotal {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #7C3AED;
+  white-space: nowrap;
+}
+
+.bookBtn {
+  background: linear-gradient(135deg, #7C3AED, #6D28D9);
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(124,58,237,0.35);
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.bookBtn:hover { opacity: 0.88; }
+.bookBtn:disabled {
+  background: #e7e5e4;
+  color: #a8a29e;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Loading / center */
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+  color: #78716c;
+  text-align: center;
+}
+
+.centerTitle { font-size: 1.1rem; font-weight: 700; color: #1c1427; }
