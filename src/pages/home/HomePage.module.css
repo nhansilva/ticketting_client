@@ -353,3 +353,45 @@
   cursor: not-allowed;
   box-shadow: none;
 }
+
+/* Skeleton loading */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.cardSkeleton {
+  background: linear-gradient(90deg, #f5f3ff 25%, #ede9fe 50%, #f5f3ff 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 1.25rem;
+  height: 280px;
+  border: 1.5px solid #ede9fe;
+}
+
+/* Error / Empty states */
+.stateBox {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #a8a29e;
+}
+
+.stateTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #78716c;
+}
+
+.retryBtn {
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #7C3AED, #6D28D9);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
