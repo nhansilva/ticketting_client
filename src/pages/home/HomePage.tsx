@@ -2,48 +2,99 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth.store';
 import { authApi } from '../../api/auth.api';
+import { useEvents } from '../../hooks/useEvents';
+import { formatDateTime } from '../../types/event.types';
+import type { EventSummary } from '../../types/event.types';
 import styles from './HomePage.module.css';
 
-const MOCK_CONCERTS = [
-  { id: 1, title: 'Anh Trai Say Hi', artist: 'Various Artists', date: '20/06/2026', venue: 'Mỹ Đình, Hà Nội', price: '800.000đ', tag: 'HOT', img: '🎤' },
-  { id: 2, title: 'Coldplay World Tour', artist: 'Coldplay', date: '15/07/2026', venue: 'Thống Nhất, TP.HCM', price: '1.500.000đ', tag: 'SOLD OUT', img: '🎸' },
-  { id: 3, title: 'Son Tung M-TP Live', artist: 'Sơn Tùng M-TP', date: '10/08/2026', venue: 'Quân Khu 7, TP.HCM', price: '600.000đ', tag: 'MỚI', img: '🎵' },
-  { id: 4, title: 'Đen Vâu Concert', artist: 'Đen Vâu', date: '05/09/2026', venue: 'Phú Thọ, TP.HCM', price: '500.000đ', tag: '', img: '🎶' },
-];
+function SkeletonGrid() {
+  return (
+    <>
+      {[1, 2, 3, 4].map((n) => (
+        <div key={n} className={styles.cardSkeleton} />
+      ))}
+    </>
+  );
+}
 
-const MOCK_MOVIES = [
-  { id: 1, title: 'Kẻ Trộm Mặt Trăng 4', genre: 'Hoạt hình', duration: '95 phút', rating: 'P', price: '85.000đ', img: '🌙' },
-  { id: 2, title: 'Avengers: Doomsday', genre: 'Hành động', duration: '150 phút', rating: 'T13', price: '120.000đ', img: '⚡' },
-  { id: 3, title: 'Lật Mặt 8', genre: 'Hành động', duration: '128 phút', rating: 'T16', price: '90.000đ', img: '🎬' },
-  { id: 4, title: 'Mai 2', genre: 'Tình cảm', duration: '115 phút', rating: 'T13', price: '95.000đ', img: '🌸' },
-];
+function EventCard({ event, onClick }: { event: EventSummary; onClick: () => void }) {
+  const [imgError, setImgError] = useState(false);
+  const imgSrc = event.imageUrls?.[0];
+  const emoji = event.type === 'CONCERT' ? '🎵' : '🎬';
+
+  return (
+    <div className={styles.card} onClick={onClick}>
+      <div className={styles.cardImg}>
+        {imgSrc && !imgError
+          ? <img src={imgSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={() => setImgError(true)} />
+          : <span style={{ fontSize: '3.5rem' }}>{emoji}</span>
+        }
+      </div>
+      {event.status === 'SOLD_OUT' && (
+        <span className={`${styles.tag} ${styles.tagSoldOut}`}>SOLD OUT</span>
+      )}
+      <div className={styles.cardBody}>
+        <h3 className={styles.cardTitle}>{event.title}</h3>
+        <p className={styles.cardSub}>📍 {event.venueName}</p>
+        <div className={styles.cardMeta}>
+          <span>📅 {formatDateTime(event.startTime)}</span>
+        </div>
+        <div className={styles.cardFooter}>
+          <span />
+          <button
+            className={`${styles.bookBtn} ${event.status === 'SOLD_OUT' ? styles.bookBtnDisabled : ''}`}
+            disabled={event.status === 'SOLD_OUT'}
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+          >
+            {event.status === 'SOLD_OUT' ? 'Hết vé' : 'Xem chi tiết →'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { user, updateUser, logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'concert' | 'movie'>('concert');
+  const [search, setSearch] = useState('');
   const [imgError, setImgError] = useState(false);
 
-  // Fetch fresh profile to get latest profileImageUrl
   useEffect(() => {
     authApi.getProfile().then(res => updateUser(res.data.data)).catch(() => {});
   }, []);
-  const [search, setSearch] = useState('');
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const {
+    data: concerts = [],
+    isLoading: concertsLoading,
+    error: concertsError,
+    refetch: refetchConcerts,
+  } = useEvents({ type: 'CONCERT', status: 'ON_SALE' });
 
-  const filteredConcerts = MOCK_CONCERTS.filter(c =>
-    c.title.toLowerCase().includes(search.toLowerCase()) ||
-    c.artist.toLowerCase().includes(search.toLowerCase())
+  const {
+    data: movies = [],
+    isLoading: moviesLoading,
+    error: moviesError,
+    refetch: refetchMovies,
+  } = useEvents({ type: 'MOVIE', status: 'ON_SALE' });
+
+  const filteredConcerts = concerts.filter(e =>
+    e.title.toLowerCase().includes(search.toLowerCase()) ||
+    e.venueName.toLowerCase().includes(search.toLowerCase())
   );
 
-  const filteredMovies = MOCK_MOVIES.filter(m =>
-    m.title.toLowerCase().includes(search.toLowerCase()) ||
-    m.genre.toLowerCase().includes(search.toLowerCase())
+  const filteredMovies = movies.filter(e =>
+    e.title.toLowerCase().includes(search.toLowerCase()) ||
+    e.venueName.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleLogout = () => { logout(); navigate('/login'); };
+
+  const isLoading = activeTab === 'concert' ? concertsLoading : moviesLoading;
+  const error     = activeTab === 'concert' ? concertsError  : moviesError;
+  const refetch   = activeTab === 'concert' ? refetchConcerts : refetchMovies;
+  const items     = activeTab === 'concert' ? filteredConcerts : filteredMovies;
 
   return (
     <div className={styles.page}>
@@ -55,7 +106,7 @@ export default function HomePage() {
             <span className={styles.searchIcon}>🔍</span>
             <input
               className={styles.searchInput}
-              placeholder="Tìm kiếm sự kiện, phim..."
+              placeholder="Tìm kiếm sự kiện, địa điểm..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -64,16 +115,11 @@ export default function HomePage() {
             <button className={styles.navBtn}>🎫 Vé của tôi</button>
             <div
               className={styles.avatar}
-              title={`${user?.firstName} ${user?.lastName} — Xem profile`}
+              title={`${user?.firstName} ${user?.lastName}`}
               onClick={() => navigate('/profile')}
             >
               {user?.profileImageUrl && !imgError
-                ? <img
-                    src={user.profileImageUrl}
-                    alt=""
-                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-                    onError={() => setImgError(true)}
-                  />
+                ? <img src={user.profileImageUrl} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} onError={() => setImgError(true)} />
                 : <>{user?.firstName?.[0]}{user?.lastName?.[0]}</>
               }
             </div>
@@ -82,7 +128,7 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero Banner */}
+      {/* Hero */}
       <div className={styles.hero}>
         <div className={styles.heroContent}>
           <p className={styles.heroLabel}>Xin chào, {user?.firstName} 👋</p>
@@ -92,7 +138,7 @@ export default function HomePage() {
         <div className={styles.heroDecor}>🎪</div>
       </div>
 
-      {/* Tab Switch */}
+      {/* Tab */}
       <div className={styles.tabBar}>
         <div className={styles.tabInner}>
           <button
@@ -112,70 +158,41 @@ export default function HomePage() {
 
       {/* Content */}
       <main className={styles.main}>
-        {activeTab === 'concert' && (
-          <>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>🔥 Concert nổi bật</h2>
-              <span className={styles.sectionCount}>{filteredConcerts.length} sự kiện</span>
-            </div>
-            <div className={styles.grid}>
-              {filteredConcerts.map(event => (
-                <div key={event.id} className={styles.card}>
-                  <div className={styles.cardImg}>{event.img}</div>
-                  {event.tag && (
-                    <span className={`${styles.tag} ${event.tag === 'SOLD OUT' ? styles.tagSoldOut : event.tag === 'HOT' ? styles.tagHot : styles.tagNew}`}>
-                      {event.tag}
-                    </span>
-                  )}
-                  <div className={styles.cardBody}>
-                    <h3 className={styles.cardTitle}>{event.title}</h3>
-                    <p className={styles.cardSub}>{event.artist}</p>
-                    <div className={styles.cardMeta}>
-                      <span>📅 {event.date}</span>
-                      <span>📍 {event.venue}</span>
-                    </div>
-                    <div className={styles.cardFooter}>
-                      <span className={styles.price}>Từ {event.price}</span>
-                      <button
-                        className={`${styles.bookBtn} ${event.tag === 'SOLD OUT' ? styles.bookBtnDisabled : ''}`}
-                        disabled={event.tag === 'SOLD OUT'}
-                      >
-                        {event.tag === 'SOLD OUT' ? 'Hết vé' : 'Đặt vé'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>
+            {activeTab === 'concert' ? '🔥 Concert nổi bật' : '🎬 Phim đang chiếu'}
+          </h2>
+          {!isLoading && !error && (
+            <span className={styles.sectionCount}>{items.length} sự kiện</span>
+          )}
+        </div>
 
-        {activeTab === 'movie' && (
-          <>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>🎬 Phim đang chiếu</h2>
-              <span className={styles.sectionCount}>{filteredMovies.length} phim</span>
+        <div className={styles.grid}>
+          {isLoading && <SkeletonGrid />}
+
+          {!isLoading && error && (
+            <div className={styles.stateBox}>
+              <p className={styles.stateTitle}>❌ Không thể tải dữ liệu</p>
+              <p>Kiểm tra kết nối tới event-catalog-service (port 8082)</p>
+              <button className={styles.retryBtn} onClick={() => refetch()}>Thử lại</button>
             </div>
-            <div className={styles.grid}>
-              {filteredMovies.map(movie => (
-                <div key={movie.id} className={styles.card}>
-                  <div className={styles.cardImg}>{movie.img}</div>
-                  <div className={styles.cardBody}>
-                    <h3 className={styles.cardTitle}>{movie.title}</h3>
-                    <p className={styles.cardSub}>{movie.genre} · {movie.duration}</p>
-                    <div className={styles.cardMeta}>
-                      <span className={styles.ratingBadge}>{movie.rating}</span>
-                    </div>
-                    <div className={styles.cardFooter}>
-                      <span className={styles.price}>Từ {movie.price}</span>
-                      <button className={styles.bookBtn}>Đặt vé</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          )}
+
+          {!isLoading && !error && items.length === 0 && (
+            <div className={styles.stateBox}>
+              <p className={styles.stateTitle}>🔍 Không tìm thấy sự kiện</p>
+              <p>{search ? `Không có kết quả cho "${search}"` : 'Hiện chưa có sự kiện nào.'}</p>
             </div>
-          </>
-        )}
+          )}
+
+          {!isLoading && !error && items.map(event => (
+            <EventCard
+              key={event.id}
+              event={event}
+              onClick={() => navigate(`/events/${event.id}`)}
+            />
+          ))}
+        </div>
       </main>
     </div>
   );
