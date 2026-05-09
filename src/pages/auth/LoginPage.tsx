@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth.api';
 import { useAuthStore } from '../../store/auth.store';
+import { Role } from '../../types/auth.types';
 import styles from './AuthPage.module.css';
 
 const GOOGLE_AUTH_URL = 'http://localhost:8081/oauth2/authorization/google';
@@ -33,7 +34,11 @@ export default function LoginPage() {
       const res = await authApi.login(data);
       const { user, accessToken, refreshToken } = res.data.data;
       setAuth(user, accessToken, refreshToken);
-      navigate('/home');
+      if(user.role === Role.ADMIN){
+        navigate('/admin');
+      } else {
+        navigate('/home')
+      }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: { message?: string } } } };
       setServerError(error.response?.data?.error?.message ?? 'Đăng nhập thất bại');

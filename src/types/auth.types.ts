@@ -58,3 +58,9 @@ export interface ApiError {
     traceId?: string;
   };
 }
+
+
+export enum Role {
+  ADMIN ='ADMIN',
+  USER = 'USER'
+}
